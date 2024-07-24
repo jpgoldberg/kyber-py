@@ -5,7 +5,7 @@ The implementation of ML-KEM from FIPS 203-ipd
 import os
 from hashlib import sha3_256, sha3_512, shake_128, shake_256
 from ..modules.modules import ModuleKyber
-from ..utilities.utils import select_bytes
+from ..utilities.utils import select_bytes, Bytes
 
 
 class ML_KEM:
@@ -56,7 +56,7 @@ class ML_KEM:
             )
 
     @staticmethod
-    def _xof(bytes32, i, j):
+    def _xof(bytes32, i, j) -> Bytes:
         """
         XOF: B^* x B x B -> B*
 
@@ -75,10 +75,10 @@ class ML_KEM:
             raise ValueError(
                 "Input bytes should be one 32 byte array and 2 single bytes."
             )
-        return shake_128(input_bytes).digest(840)
+        return Bytes(shake_128(input_bytes).digest(840))
 
     @staticmethod
-    def _prf(eta, s, b):
+    def _prf(eta, s, b) -> Bytes:
         """
         Pseudorandom function described between lines 726 - 731 of in FIPS
         203-ipd
@@ -88,20 +88,20 @@ class ML_KEM:
             raise ValueError(
                 "Input bytes should be one 32 byte array and one single byte."
             )
-        return shake_256(input_bytes).digest(eta * 64)
+        return Bytes(shake_256(input_bytes).digest(eta * 64))
 
     # Three hash functions described between lines
     # 741 - 750 in FIPS 203-ipd
     @staticmethod
-    def _H(s):
-        return sha3_256(s).digest()
+    def _H(s) -> Bytes:
+        return Bytes(sha3_256(s).digest())
 
     @staticmethod
     def _J(s):
-        return shake_256(s).digest(32)
+        return Bytes(shake_256(s).digest(32))
 
     @staticmethod
-    def _G(s):
+    def _G(s) -> tuple[bytes, bytes]:
         h = sha3_512(s).digest()
         return h[:32], h[32:]
 

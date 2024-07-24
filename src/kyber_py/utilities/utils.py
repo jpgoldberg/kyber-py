@@ -1,3 +1,8 @@
+
+# Python 3.8 compatible type alias
+Coefficients = list[int]
+
+
 class Bits(bytes):
     def __new__(cls, arg):
         if not isinstance(arg, str):
@@ -5,7 +10,8 @@ class Bits(bytes):
         return bytes.__new__(cls, arg, encoding="ascii")
 
     def bytes(self) -> "Bytes":
-        return Bytes([int(self[i : i + 8][::-1], 2) for i in range(0, len(self), 8)])
+        return Bytes([int(self[i:i + 8][::-1], 2)
+                      for i in range(0, len(self), 8)])
 
 
 class Bytes(bytes):

@@ -1,5 +1,5 @@
 from .polynomials_generic import PolynomialRing, Polynomial
-from ..utilities.utils import bytes_to_bits, bitstring_to_bytes
+from ..utilities.utils import Bytes, Bits, Coefficients
 
 
 class PolynomialRingKyber(PolynomialRing):
@@ -10,7 +10,7 @@ class PolynomialRingKyber(PolynomialRing):
     """
 
     def __init__(self):
-        self.q = 3329
+        self.q= 3329
         self.n = 256
         self.element = PolynomialKyber
         self.element_ntt = PolynomialKyberNTT
@@ -53,17 +53,17 @@ class PolynomialRingKyber(PolynomialRing):
             i = i + 3
         return self(coefficients, is_ntt=is_ntt)
 
-    def cbd(self, input_bytes, eta, is_ntt=False):
+    def cbd(self, input_bytes: Bytes, eta, is_ntt=False):
         """
         Algorithm 2 (Centered Binomial Distribution)
         https://pq-crystals.org/kyber/data/kyber-specification-round3-20210804.pdf
 
         Expects a byte array of length (eta * deg / 4)
         For Kyber, this is 64 eta.
-        """
+                """
         assert 64 * eta == len(input_bytes)
         coefficients = [0 for _ in range(256)]
-        list_of_bits = bytes_to_bits(input_bytes)
+        list_of_bits = input_bytes.bits()
         for i in range(256):
             a = sum(list_of_bits[eta * 2 * i : eta * (2 * i + 1)])
             b = sum(list_of_bits[eta * (2 * i + 1) : eta * (2 * i + 2)])
@@ -109,7 +109,7 @@ class PolynomialRingKyber(PolynomialRing):
                 idx += 1
         return self(coeffs, is_ntt=is_ntt)
 
-    def __call__(self, coefficients, is_ntt=False):
+    def __call__(self, coefficients: Coefficients | int, is_ntt: bool = False):
         if not is_ntt:
             element = self.element
         else:
@@ -125,7 +125,7 @@ class PolynomialRingKyber(PolynomialRing):
 
 
 class PolynomialKyber(Polynomial):
-    def __init__(self, parent, coefficients):
+    def __init__(self, parent, coefficients: Coefficients):
         self.parent = parent
         self.coeffs = self._parse_coefficients(coefficients)
 
@@ -134,7 +134,8 @@ class PolynomialKyber(Polynomial):
         Encode (Inverse of Algorithm 3)
         """
         bit_string = "".join(format(c, f"0{d}b")[::-1] for c in self.coeffs)
-        return bitstring_to_bytes(bit_string)
+        bit_string = Bits(bit_string)
+        return bit_string.bytes()
 
     def _compress_ele(self, x, d):
         """

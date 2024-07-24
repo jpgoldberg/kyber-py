@@ -1,7 +1,7 @@
 import os
 from hashlib import sha3_256, sha3_512, shake_128, shake_256
 from ..modules.modules import ModuleKyber
-from ..utilities.utils import select_bytes
+from ..utilities.utils import select_bytes, Bytes
 
 
 class Kyber:
@@ -88,7 +88,7 @@ class Kyber:
         return output[:32], output[32:]
 
     @staticmethod
-    def _prf(s, b, length):
+    def _prf(s, b, length) -> Bytes:
         """
         PRF: B^32 x B -> B^*
         """
@@ -97,7 +97,7 @@ class Kyber:
             raise ValueError(
                 "Input bytes should be one 32 byte array and one single byte."
             )
-        return shake_256(input_bytes).digest(length)
+        return Bytes(shake_256(input_bytes).digest(length))
 
     @staticmethod
     def _kdf(input_bytes, length):
